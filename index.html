@@ -4,222 +4,403 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SAP T-Code Assistant</title>
-
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #07122c 0%, #08183d 100%);
+      color: #ffffff;
+      min-height: 100vh;
     }
 
     .header {
-      padding: 16px;
-      border-bottom: 1px solid #334155;
-      background: #111827;
+      background: #07122c;
+      padding: 24px 28px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .chat {
-      flex: 1;
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+    }
+
+    .chat-area {
+      min-height: 460px;
+      max-height: 62vh;
       overflow-y: auto;
-      padding: 20px;
-      padding-bottom: 140px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: transparent;
     }
 
-    .message {
-      margin-bottom: 16px;
+    .message-row {
+      display: flex;
+      width: 100%;
     }
 
-    .user {
-      text-align: right;
+    .message-row.user {
+      justify-content: flex-end;
     }
 
-    .bot {
-      text-align: left;
+    .message-row.bot {
+      justify-content: flex-start;
     }
 
     .bubble {
-      display: inline-block;
+      max-width: 76%;
+      padding: 16px 18px;
+      border-radius: 18px;
+      line-height: 1.5;
+      font-size: 16px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .bubble.user {
+      background: #2f6df6;
+      color: #ffffff;
+      border-bottom-right-radius: 6px;
+    }
+
+    .bubble.bot {
+      background: rgba(255, 255, 255, 0.10);
+      color: #ffffff;
+      border-bottom-left-radius: 6px;
+    }
+
+    .meta {
+      margin-top: 10px;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    .result-box {
+      margin-top: 12px;
       padding: 12px 14px;
       border-radius: 12px;
-      max-width: 70%;
-      white-space: pre-wrap;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 14px;
     }
 
-    .user .bubble {
-      background: #2563eb;
-    }
-
-    .bot .bubble {
-      background: #1f2937;
-    }
-
-    .sap-badge {
+    .result-box strong {
       display: inline-block;
-      background: black;
-      color: #22c55e;
-      border: 1px solid #374151;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-weight: bold;
-      margin-top: 6px;
+      min-width: 90px;
     }
 
-    .copy-btn {
-      margin-top: 6px;
-      background: #16a34a;
-      border: none;
-      color: white;
-      padding: 5px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    .input-box {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
+    .chips {
       display: flex;
-      padding: 12px;
-      background: #111827;
-      border-top: 1px solid #334155;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 0 24px 20px;
     }
 
-    textarea {
-      flex: 1;
-      resize: none;
+    .chip {
       border: none;
-      outline: none;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    button {
-      margin-left: 8px;
-      padding: 10px 14px;
-      border: none;
-      background: #2563eb;
-      color: white;
-      border-radius: 8px;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 14px;
       cursor: pointer;
+      background: rgba(47, 109, 246, 0.16);
+      color: #dfe9ff;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .chip:hover {
+      transform: translateY(-1px);
+      background: rgba(47, 109, 246, 0.26);
+    }
+
+    .input-bar {
+      display: flex;
+      gap: 14px;
+      padding: 18px 20px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .input-bar input {
+      flex: 1;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .input-bar input::placeholder {
+      color: rgba(255, 255, 255, 0.58);
+    }
+
+    .input-bar button {
+      min-width: 130px;
+      border: none;
+      border-radius: 14px;
+      padding: 16px 20px;
+      background: #2f6df6;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .input-bar button:hover {
+      transform: translateY(-1px);
+      opacity: 0.95;
+    }
+
+    .input-bar button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status {
+      padding: 14px 24px 0;
+      font-size: 14px;
+      color: #d9e5ff;
+      opacity: 0.9;
+    }
+
+    .small {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .bubble {
+        max-width: 88%;
+      }
+
+      .input-bar {
+        flex-direction: column;
+      }
+
+      .input-bar button {
+        width: 100%;
+      }
     }
   </style>
 </head>
-
 <body>
-
   <div class="header">
-    <b>SAP T-Code Assistant</b>
+    <h1>SAP T-Code Assistant</h1>
   </div>
 
-  <div id="chat" class="chat"></div>
+  <div class="container">
+    <div class="card">
+      <div class="status" id="statusText">
+        Connected UI. Ready to query backend.
+      </div>
 
-  <div class="input-box">
-    <textarea id="msg" rows="1" placeholder="Ask SAP question..."></textarea>
-    <button onclick="send()">Send</button>
+      <div class="chat-area" id="chatBox">
+        <div class="message-row bot">
+          <div class="bubble bot">
+            Welcome. Ask me an SAP business task and I will suggest the relevant SAP T-code.
+            <div class="meta">Examples: create purchase order, post goods movement, display sales order</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chips">
+        <button class="chip" onclick="quickAsk('Create purchase order')">Create Purchase Order</button>
+        <button class="chip" onclick="quickAsk('Post goods receipt')">Post Goods Receipt</button>
+        <button class="chip" onclick="quickAsk('Create sales order')">Create Sales Order</button>
+        <button class="chip" onclick="quickAsk('Display customer invoice')">Display Customer Invoice</button>
+      </div>
+
+      <div class="input-bar">
+        <input
+          id="userInput"
+          type="text"
+          placeholder="Type your SAP task here..."
+          onkeydown="handleKey(event)"
+        />
+        <button id="sendBtn" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    // 🔴 IMPORTANT: Replace with your Render backend URL
-    const API_URL = "https://sap-tcode-backend.onrender.com/chat/search-tcode";
+    // =====================================================
+    // IMPORTANT: Replace with your real Render backend URL
+    // Example: https://sap-tcode-backend.onrender.com
+    // =====================================================
+    const API_BASE_URL = "https://sap-tcode-backend.onrender.com";
 
-    function addMessage(text, role) {
-      const chat = document.getElementById("chat");
+    const chatBox = document.getElementById("chatBox");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const statusText = document.getElementById("statusText");
 
-      const div = document.createElement("div");
-      div.className = "message " + role;
-
-      const bubble = document.createElement("div");
-      bubble.className = "bubble";
-
-      if (role === "bot" && text.includes("SAP T-CODE")) {
-        const lines = text.split("\n");
-        let tcode = "";
-        let cleaned = [];
-
-        for (let i = 0; i < lines.length; i++) {
-          let line = lines[i].trim();
-
-          if (!line) continue;
-
-          if (line.includes("SAP T-CODE") && lines[i + 1]) {
-            tcode = lines[i + 1].trim();
-            i++;
-            continue;
-          }
-
-          if (line.includes("━━")) continue;
-          if (line.toLowerCase().startsWith("confidence")) continue;
-          if (line.toLowerCase().startsWith("module")) continue;
-
-          cleaned.push(line);
-        }
-
-        if (tcode) {
-          const badge = document.createElement("div");
-          badge.className = "sap-badge";
-          badge.innerText = tcode;
-          bubble.appendChild(badge);
-
-          const btn = document.createElement("button");
-          btn.className = "copy-btn";
-          btn.innerText = "Copy";
-
-          btn.onclick = () => {
-            navigator.clipboard.writeText(tcode);
-            btn.innerText = "Copied!";
-            setTimeout(() => btn.innerText = "Copy", 1500);
-          };
-
-          bubble.appendChild(document.createElement("br"));
-          bubble.appendChild(btn);
-        }
-
-        const textDiv = document.createElement("div");
-        textDiv.innerText = cleaned.join("\n");
-        bubble.appendChild(textDiv);
-
-      } else {
-        bubble.innerText = text;
+    function handleKey(event) {
+      if (event.key === "Enter") {
+        sendMessage();
       }
-
-      div.appendChild(bubble);
-      chat.appendChild(div);
-
-      chat.scrollTop = chat.scrollHeight;
     }
 
-    async function send() {
-      const input = document.getElementById("msg");
-      const message = input.value.trim();
+    function quickAsk(text) {
+      userInput.value = text;
+      sendMessage();
+    }
 
-      if (!message) return;
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
 
-      addMessage(message, "user");
-      input.value = "";
+    function appendUserMessage(text) {
+      const row = document.createElement("div");
+      row.className = "message-row user";
+      row.innerHTML = `
+        <div class="bubble user">${escapeHtml(text)}</div>
+      `;
+      chatBox.appendChild(row);
+      scrollToBottom();
+    }
+
+    function appendBotMessage(htmlContent) {
+      const row = document.createElement("div");
+      row.className = "message-row bot";
+      row.innerHTML = `
+        <div class="bubble bot">${htmlContent}</div>
+      `;
+      chatBox.appendChild(row);
+      scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function setBusy(isBusy) {
+      sendBtn.disabled = isBusy;
+      userInput.disabled = isBusy;
+      statusText.textContent = isBusy
+        ? "Contacting backend..."
+        : "Connected UI. Ready to query backend.";
+    }
+
+    function buildResultHtml(data) {
+      const mainText =
+        data.answer ||
+        data.speech ||
+        data.message ||
+        "No response returned.";
+
+      let html = `<div>${escapeHtml(mainText)}</div>`;
+
+      const bestMatch = data.best_match || null;
+      if (bestMatch && typeof bestMatch === "object") {
+        const code =
+          bestMatch.tcode ||
+          bestMatch.code ||
+          bestMatch.t_code ||
+          "";
+        const description =
+          bestMatch.description ||
+          bestMatch.task ||
+          bestMatch.text ||
+          "";
+        const module =
+          bestMatch.module || "";
+        const confidence =
+          data.confidence_label || data.confidence || "";
+
+        html += `
+          <div class="result-box">
+            ${code ? `<div><strong>T-code:</strong> ${escapeHtml(code)}</div>` : ""}
+            ${description ? `<div><strong>Description:</strong> ${escapeHtml(description)}</div>` : ""}
+            ${module ? `<div><strong>Module:</strong> ${escapeHtml(module)}</div>` : ""}
+            ${confidence ? `<div><strong>Confidence:</strong> ${escapeHtml(String(confidence))}</div>` : ""}
+          </div>
+        `;
+      }
+
+      return html;
+    }
+
+    async function sendMessage() {
+      const query = userInput.value.trim();
+      if (!query) return;
+
+      appendUserMessage(query);
+      userInput.value = "";
+      setBusy(true);
 
       try {
-        const res = await fetch(API_URL, {
+        const response = await fetch(`${API_BASE_URL}/chat`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            session_id: "web",
-            message: message
-          })
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ query })
         });
 
-        const data = await res.json();
-        addMessage(data.reply || "No response", "bot");
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
 
-      } catch (e) {
-        addMessage("Backend error. Check CORS / URL.", "bot");
+        const data = await response.json();
+        appendBotMessage(buildResultHtml(data));
+      } catch (error) {
+        console.error("Frontend -> backend call failed:", error);
+        appendBotMessage(
+          `Backend error. Check CORS / URL.<div class="meta small">${escapeHtml(error.message)}</div>`
+        );
+      } finally {
+        setBusy(false);
+        userInput.focus();
       }
     }
-  </script>
 
+    async function pingBackend() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/health`);
+        if (!response.ok) {
+          throw new Error(`Health check failed: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.status === "healthy") {
+          statusText.textContent = "Backend connected successfully.";
+        } else {
+          statusText.textContent = "Frontend loaded. Backend returned an unexpected health response.";
+        }
+      } catch (error) {
+        console.error("Health check failed:", error);
+        statusText.textContent = "Frontend loaded, but backend health check failed.";
+      }
+    }
+
+    pingBackend();
+  </script>
 </body>
 </html>
